@@ -155,7 +155,7 @@ export const repo = {
       await d.slips.bulkPut(p.slips as Slip[]);
       await d.journal.bulkPut(p.journal as JournalEntry[]);
       await d.challenges.bulkPut(p.challenges as Challenge[]);
-      if (p.settings[0]) await d.settings.put({ ...DEFAULT_SETTINGS, ...(p.settings[0] as Settings), id: SETTINGS_ID });
+      if (p.settings[0]) await d.settings.put({ ...DEFAULT_SETTINGS, ...(p.settings[0] as unknown as Settings), id: SETTINGS_ID });
     });
     return p.habits.length;
   },

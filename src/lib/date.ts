@@ -15,7 +15,7 @@ export function logicalDateOf(ts: number, rolloverHour = 4) {
 }
 
 export const parse = (s: string) => {
-  const [y, m, d] = s.split("-").map(Number);
+  const [y = 1970, m = 1, d = 1] = s.split("-").map(Number);
   return new Date(y, m - 1, d, 12);
 };
 
