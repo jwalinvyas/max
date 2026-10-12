@@ -70,7 +70,7 @@ export function statusOf(h: Habit, date: string, today: string, ix: Index, weekS
 
 export function cleanDays(h: Habit, date: string, ix: Index) {
   const slips = (ix.lastSlip.get(h.id) ?? []).filter((d) => d <= date);
-  const from = slips.length ? slips[slips.length - 1] : ix.start.get(h.id) ?? date;
+  const from = slips.at(-1) ?? ix.start.get(h.id) ?? date;
   return Math.max(0, diffDays(from, date));
 }
 
