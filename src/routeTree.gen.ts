@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JournalRouteImport } from './routes/journal'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as StatsRouteImport } from './routes/stats'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const JournalRoute = JournalRouteImport.update({
   path: '/journal',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StatsRoute = StatsRouteImport.update({
   id: '/stats',
   path: '/stats',
@@ -32,30 +38,34 @@ const StatsRoute = StatsRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/journal': typeof JournalRoute
+  '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/journal': typeof JournalRoute
+  '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/journal': typeof JournalRoute
+  '/settings': typeof SettingsRoute
   '/stats': typeof StatsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/journal' | '/stats'
+  fullPaths: '/' | '/journal' | '/settings' | '/stats'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/journal' | '/stats'
-  id: '__root__' | '/' | '/journal' | '/stats'
+  to: '/' | '/journal' | '/settings' | '/stats'
+  id: '__root__' | '/' | '/journal' | '/settings' | '/stats'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   JournalRoute: typeof JournalRoute
+  SettingsRoute: typeof SettingsRoute
   StatsRoute: typeof StatsRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JournalRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stats': {
       id: '/stats'
       path: '/stats'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   JournalRoute: JournalRoute,
+  SettingsRoute: SettingsRoute,
   StatsRoute: StatsRoute,
 }
 export const routeTree = rootRouteImport
