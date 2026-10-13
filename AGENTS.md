@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Use the shared PageHeader for content screens and semantic CSS tokens for visual roles, keeping the local-only data model separate from presentation.

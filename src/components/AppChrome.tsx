@@ -3,12 +3,14 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { setupPwa } from "@/lib/pwa";
 import { useApp, useOverallStreak } from "@/data/AppData";
+import { CircleCheck, BookOpen, ChartNoAxesColumn } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function TabBar() {
   const tabs = [
-    { to: "/", label: "Today" },
-    { to: "/journal", label: "Journal" },
-    { to: "/stats", label: "Stats" },
+    { to: "/", label: "Today", icon: CircleCheck },
+    { to: "/journal", label: "Journal", icon: BookOpen },
+    { to: "/stats", label: "Stats", icon: ChartNoAxesColumn },
   ] as const;
   return (
     <nav
@@ -21,9 +23,10 @@ export function TabBar() {
             <Link
               to={t.to}
               activeOptions={{ exact: true }}
-              className="tap flex h-14 items-center justify-center text-sm font-medium text-muted-foreground transition-colors"
+                        className="nav-tab"
               activeProps={{ className: "text-foreground" , "aria-current": "page" }}
             >
+              <t.icon size={19} strokeWidth={1.6} />
               {t.label}
             </Link>
           </li>
@@ -61,7 +64,7 @@ export function IosInstallHint() {
   return (
     <div role="status" className="fixed inset-x-3 bottom-20 z-40 mb-[env(safe-area-inset-bottom)] flex items-center gap-3 rounded-xl border bg-card px-4 py-2 text-sm">
       <span className="flex-1">Tap Share, then Add to Home Screen.</span>
-      <button
+      <Button variant="ghost"
         className="tap text-muted-foreground"
         onClick={() => {
           localStorage.setItem("max.iosHint", "1");
@@ -69,7 +72,7 @@ export function IosInstallHint() {
         }}
       >
         Dismiss
-      </button>
+      </Button>
     </div>
   );
 }
@@ -95,9 +98,9 @@ export function StreakBreakWhy() {
       <p className="eyebrow">A {prev}-day streak ended</p>
       <p className="max-w-md text-3xl font-semibold leading-tight">{settings.why}</p>
       <p className="text-muted-foreground">Start again today.</p>
-      <button className="tap rounded-full border px-6" onClick={() => setOpen(false)} autoFocus>
+      <Button variant="outline" className="tap rounded-lg px-6" onClick={() => setOpen(false)} autoFocus>
         Continue
-      </button>
+      </Button>
     </div>
   );
 }
