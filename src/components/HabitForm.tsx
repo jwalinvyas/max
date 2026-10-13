@@ -1,8 +1,10 @@
+import { Button } from "@/components/ui/button";
+import { Check, Plus, Archive, Trash2 } from "lucide-react";
 import { useState } from "react";
 import type { Habit, HabitInput, HabitType, Schedule } from "@/data/types";
 import { WEEKDAYS } from "@/lib/date";
 
-const field = "w-full rounded-lg border bg-transparent px-3 h-11 text-base";
+const field = "w-full rounded-lg border bg-transparent px-3 h-11 text-sm";
 
 export function HabitForm({
   initial,
@@ -49,9 +51,9 @@ export function HabitForm({
         <span className="eyebrow">Type</span>
         <div className="flex gap-2">
           {(["build", "quit", "count"] as const).map((t) => (
-            <button type="button" key={t} className={seg(type === t)} onClick={() => setType(t)}>
+            <Button variant="outline" type="button" key={t} className={seg(type === t)} onClick={() => setType(t)}>
               {t === "build" ? "Do" : t === "quit" ? "Quit" : "Count"}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -71,16 +73,16 @@ export function HabitForm({
         <div className="space-y-2">
           <span className="eyebrow">Schedule</span>
           <div className="flex gap-2">
-            <button type="button" className={seg(schedule.kind === "daily")} onClick={() => setSchedule({ kind: "daily" })}>Daily</button>
-            <button type="button" className={seg(schedule.kind === "weekdays")} onClick={() => setSchedule({ kind: "weekdays", days: [1, 2, 3, 4, 5] })}>Days</button>
-            <button type="button" className={seg(schedule.kind === "perWeek")} onClick={() => setSchedule({ kind: "perWeek", times: 3 })}>Per week</button>
+            <Button variant="outline" type="button" className={seg(schedule.kind === "daily")} onClick={() => setSchedule({ kind: "daily" })}>Daily</Button>
+            <Button variant="outline" type="button" className={seg(schedule.kind === "weekdays")} onClick={() => setSchedule({ kind: "weekdays", days: [1, 2, 3, 4, 5] })}>Days</Button>
+            <Button variant="outline" type="button" className={seg(schedule.kind === "perWeek")} onClick={() => setSchedule({ kind: "perWeek", times: 3 })}>Per week</Button>
           </div>
           {schedule.kind === "weekdays" && (
             <div className="flex gap-1">
               {WEEKDAYS.map((d, i) => {
                 const on = schedule.days.includes(i);
                 return (
-                  <button
+                  <Button variant="outline"
                     type="button"
                     key={d}
                     aria-pressed={on}
@@ -88,7 +90,7 @@ export function HabitForm({
                     onClick={() => setSchedule({ kind: "weekdays", days: on ? schedule.days.filter((x) => x !== i) : [...schedule.days, i] })}
                   >
                     {d[0]}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -96,9 +98,9 @@ export function HabitForm({
           {schedule.kind === "perWeek" && (
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-                <button type="button" key={n} className={seg(schedule.times === n)} onClick={() => setSchedule({ kind: "perWeek", times: n })}>
+                <Button variant="outline" type="button" key={n} className={seg(schedule.times === n)} onClick={() => setSchedule({ kind: "perWeek", times: n })}>
                   {n}×
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -109,21 +111,21 @@ export function HabitForm({
           <span className="block font-medium">Non-negotiable</span>
           <span className="text-sm text-muted-foreground">All of these done = day won.</span>
         </span>
-        <input type="checkbox" className="size-5 accent-[var(--done)]" checked={nn} onChange={(e) => setNn(e.target.checked)} />
+        <input type="checkbox" className="size-5 accent-foreground" checked={nn} onChange={(e) => setNn(e.target.checked)} />
       </label>
-      <button className="tap w-full rounded-full bg-foreground font-semibold text-background">{initial ? "Save" : "Add habit"}</button>
+      <Button variant="outline" className="tap w-full rounded-lg bg-foreground font-semibold text-background">{initial ? <Check /> : <Plus />}{initial ? "Save" : "Add habit"}</Button>
       {initial && (
         <div className="flex gap-2">
-          <button type="button" className="tap flex-1 rounded-full border text-sm" onClick={onArchive}>
-            {initial.archived ? "Unarchive" : "Archive"}
-          </button>
-          <button
+          <Button variant="outline" type="button" className="tap flex-1 rounded-lg border text-sm" onClick={onArchive}>
+            <Archive />{initial.archived ? "Unarchive" : "Archive"}
+          </Button>
+          <Button variant="outline"
             type="button"
-            className="tap flex-1 rounded-full border text-sm text-destructive"
+            className="tap flex-1 rounded-lg border text-sm text-destructive"
             onClick={() => confirm("Delete this habit? History is kept in your stats.") && onDelete?.()}
           >
-            Delete
-          </button>
+            <Trash2 /> Delete
+          </Button>
         </div>
       )}
     </form>
