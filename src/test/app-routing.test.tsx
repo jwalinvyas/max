@@ -1,6 +1,9 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter, rootRouteId } from "@tanstack/react-router";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+// Route matching does not register a service worker; its Vite virtual module is unavailable in tests.
+vi.mock("@/lib/pwa", () => ({ setupPwa: vi.fn() }));
 
 import { routeTree } from "@/routeTree.gen";
 

@@ -41,7 +41,7 @@
 
 /* Dark is the default */
 :root {
-  --radius: 0.75rem;
+  --radius: 0.5rem;
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.18 0 0);
@@ -53,7 +53,7 @@
   --secondary: oklch(0.22 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.22 0 0);
-  --muted-foreground: oklch(0.62 0 0);
+  --muted-foreground: oklch(0.68 0 0);
   --accent: oklch(0.24 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.65 0.2 25);
@@ -61,7 +61,7 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 14%);
   --ring: oklch(0.985 0 0 / 60%);
-  --done: #22c55e;
+  --done: oklch(0.723 0.219 149.58);
   --done-foreground: oklch(0.145 0 0);
   --heat-0: oklch(0.21 0 0);
   color-scheme: dark;
@@ -97,6 +97,8 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
   }
@@ -132,11 +134,28 @@
   font-variant-numeric: tabular-nums;
 }
 @utility eyebrow {
-  font-size: 0.7rem;
-  letter-spacing: 0.14em;
+  font-size: 0.625rem;
+  letter-spacing: 0;
+  font-weight: 500;
   text-transform: uppercase;
   color: var(--color-muted-foreground);
 }
+
+.page-header { padding-top: 12px; }
+.wordmark { font-size: 22px; font-weight: 800; line-height: 1; }
+.screen { padding-bottom: 24px; }
+.screen > section + section { padding-top: 24px; border-top: 1px solid var(--border); }
+.day-picker { padding: 5px; border: 1px solid var(--border); border-radius: 8px; }
+.day-picker button { height: 54px; padding: 4px 0; gap: 5px; font-weight: 400; }
+.day-picker button[aria-pressed="true"] { font-weight: 600; }
+.habit-row { min-height: 80px; }
+.habit-symbol { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 8px; color: var(--muted-foreground); }
+.habit-symbol.is-done { color: var(--done); border-color: color-mix(in oklch, var(--done) 25%, transparent); background: color-mix(in oklch, var(--done) 6%, transparent); }
+.nav-tab { display: flex; min-height: 64px; flex-direction: column; align-items: center; justify-content: center; gap: 5px; font-size: 10px; color: var(--muted-foreground); transition: color 160ms; }
+.nav-tab[aria-current="page"] { color: var(--foreground); }
+.nav-tab[aria-current="page"] svg { stroke-width: 2.2; }
+.screen input, .screen textarea { background: var(--card); }
+.screen textarea { line-height: 1.6; }
 @utility no-scrollbar {
   scrollbar-width: none;
   &::-webkit-scrollbar {

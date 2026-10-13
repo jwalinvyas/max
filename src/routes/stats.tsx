@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/PageHeader";
 import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { useApp } from "@/data/AppData";
@@ -11,6 +13,8 @@ const TrendChart = lazy(() => import("@/components/TrendChart"));
 export const Route = createFileRoute("/stats")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Stats — MAX" },
       { name: "description", content: "Heatmap, streaks, consistency and challenges." },
       { property: "og:title", content: "Stats — MAX" },
@@ -46,17 +50,14 @@ function Stats() {
 
   const Metric = ({ v, l }: { v: string | number; l: string }) => (
     <div>
-      <p className="num text-3xl font-semibold">{v}</p>
+      <p className="num text-2xl font-semibold">{v}</p>
       <p className="eyebrow">{l}</p>
     </div>
   );
 
   return (
-    <main className="pt-safe px-safe space-y-10">
-      <header className="pt-6">
-        <p className="eyebrow">Stats</p>
-        <h1 className="text-4xl font-extrabold leading-none">The record</h1>
-      </header>
+    <main className="screen pt-safe px-safe space-y-6">
+      <PageHeader label="Stats" title="The record" settings />
       {habits.length === 0 ? (
         <p className="text-muted-foreground">Nothing to measure yet.</p>
       ) : (
@@ -102,7 +103,7 @@ function Stats() {
             <h2 className="eyebrow">Challenge</h2>
             {active ? (
               <div className="space-y-2">
-                <p className="num text-3xl font-semibold">
+                <p className="num text-2xl font-semibold">
                   Day {Math.min(active.length, diffDays(active.startDate, today) + 1)} / {active.length}
                 </p>
                 <p className="text-sm text-muted-foreground">
@@ -111,19 +112,19 @@ function Stats() {
                 {active.strict && [...days].some(([d, a]) => d >= active.startDate && d < today && a.nnTotal > 0 && !a.won) && (
                   <p className="text-sm text-destructive">A day was missed. Restart to stay honest.</p>
                 )}
-                <button className="tap rounded-full border px-5 text-sm" onClick={() => repo.endChallenge(active.id, today)}>End challenge</button>
+                <Button variant="outline" className="tap rounded-lg border px-5 text-sm" onClick={() => repo.endChallenge(active.id, today)}>End challenge</Button>
               </div>
             ) : (
               <div className="flex gap-2">
                 {[30, 75, 100].map((n) => (
-                  <button key={n} aria-pressed={len === n} onClick={() => setLen(n)} className={`tap num flex-1 rounded-lg border ${len === n ? "bg-foreground text-background" : ""}`}>{n}</button>
+                  <Button variant="outline" key={n} aria-pressed={len === n} onClick={() => setLen(n)} className={`tap num flex-1 rounded-lg border ${len === n ? "bg-foreground text-background" : ""}`}>{n}</Button>
                 ))}
-                <button
-                  className="tap flex-[2] rounded-full bg-foreground text-sm font-semibold text-background"
+                <Button variant="outline"
+                  className="tap flex-[2] rounded-lg bg-foreground text-sm font-semibold text-background"
                   onClick={() => repo.startChallenge({ length: len, startDate: today, strict: true, habitIds: habits.filter((h) => h.nonNegotiable && !h.archived).map((h) => h.id) })}
                 >
                   Start
-                </button>
+                </Button>
               </div>
             )}
           </section>
@@ -139,7 +140,7 @@ function Stats() {
                       <p className="font-medium">{name(sl.habitId)} <span className="num text-muted-foreground">· {pretty(sl.date, { month: "short", day: "numeric" })}</span></p>
                       {sl.note && <p className="text-muted-foreground">{sl.note}</p>}
                     </div>
-                    <button className="text-xs text-muted-foreground" onClick={() => repo.deleteSlip(sl.id)} aria-label="Remove slip">Remove</button>
+                    <Button variant="outline" className="text-xs text-muted-foreground" onClick={() => repo.deleteSlip(sl.id)} aria-label="Remove slip">Remove</Button>
                   </li>
                 ))}
               </ul>

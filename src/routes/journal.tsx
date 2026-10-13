@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/PageHeader";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useApp } from "@/data/AppData";
@@ -7,6 +9,8 @@ import { pretty } from "@/lib/date";
 export const Route = createFileRoute("/journal")({
   head: () => ({
     meta: [
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { title: "Journal — MAX" },
       { name: "description", content: "Set an intention, reflect honestly, track mood and energy." },
       { property: "og:title", content: "Journal — MAX" },
@@ -22,9 +26,9 @@ function Scale({ label, value, onChange }: { label: string; value: number | null
       <span className="eyebrow">{label}</span>
       <div className="flex gap-2" role="group" aria-label={label}>
         {[1, 2, 3, 4, 5].map((n) => (
-          <button key={n} aria-pressed={value === n} onClick={() => onChange(n)} className={`tap num flex-1 rounded-lg border ${value === n ? "bg-foreground text-background" : "text-muted-foreground"}`}>
+          <Button variant="outline" key={n} aria-pressed={value === n} onClick={() => onChange(n)} className={`tap num flex-1 rounded-lg border ${value === n ? "bg-foreground text-background" : "text-muted-foreground"}`}>
             {n}
-          </button>
+          </Button>
         ))}
       </div>
     </div>
@@ -62,11 +66,8 @@ function Journal() {
 
   const area = "w-full rounded-lg border bg-transparent p-3 text-base";
   return (
-    <main className="pt-safe px-safe space-y-8">
-      <header className="pt-6">
-        <p className="eyebrow">Journal</p>
-        <h1 className="text-4xl font-extrabold leading-none">{pretty(today, { month: "long", day: "numeric" })}</h1>
-      </header>
+    <main className="screen pt-safe px-safe space-y-6">
+      <PageHeader label="Journal" title={pretty(today, { month: "long", day: "numeric" })} settings />
       <label className="block space-y-2">
         <span className="eyebrow">Intention</span>
         <input className={`${area} h-11 py-0`} value={intention} onChange={(e) => setIntention(e.target.value)} placeholder="Today I will…" />
@@ -75,9 +76,9 @@ function Journal() {
         <span className="eyebrow">Reflection</span>
         <div className="flex flex-wrap gap-2">
           {settings.prompts.map((p) => (
-            <button key={p} className="rounded-full border px-3 py-1 text-xs text-muted-foreground" onClick={() => setReflection((r) => (r ? `${r}\n\n${p}\n` : `${p}\n`))}>
+            <Button variant="outline" key={p} className="h-auto min-h-8 whitespace-normal rounded-lg border px-3 py-1 text-left text-[11px] text-muted-foreground" onClick={() => setReflection((r) => (r ? `${r}\n\n${p}\n` : `${p}\n`))}>
               {p}
-            </button>
+            </Button>
           ))}
         </div>
         <textarea aria-label="Reflection" className={`${area} min-h-40`} value={reflection} onChange={(e) => setReflection(e.target.value)} placeholder="Use #tags to find it later." />
