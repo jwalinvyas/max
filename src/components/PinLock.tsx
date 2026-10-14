@@ -24,7 +24,7 @@ export async function hashPin(pin: string) {
 export async function verifyPin(pin: string, stored: string) {
   const parts = stored.split("$");
   if (parts[0] === "pbkdf2" && parts.length === 4) {
-    const salt = new Uint8Array(parts[2].match(/../g)!.map((h) => parseInt(h, 16)));
+    const salt = new Uint8Array((parts[2] ?? "").match(/../g)?.map((h) => parseInt(h, 16)));
     return (await pbkdf2(pin, salt, Number(parts[1]))) === parts[3];
   }
   // Legacy unsalted SHA-256 hashes from the first version.
