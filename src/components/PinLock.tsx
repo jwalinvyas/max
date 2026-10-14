@@ -87,7 +87,7 @@ export function PinSettings() {
                 setMode(null); toast("PIN lock on."); return true;
               }
               if ((await hashPin(p)) !== settings.pinHash) return false;
-              await repo.updateSettings({ pinHash: undefined });
+              await repo.updateSettings({ pinHash: "" });
               setMode(null); toast("PIN lock off."); return true;
             }}
           />
