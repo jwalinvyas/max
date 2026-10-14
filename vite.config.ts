@@ -41,8 +41,12 @@ export default defineConfig({
             },
             {
               urlPattern: ({ url }) => url.origin.includes("fonts.g"),
-              handler: "StaleWhileRevalidate",
-              options: { cacheName: "max-fonts" },
+              handler: "CacheFirst",
+              options: {
+                cacheName: "max-fonts",
+                expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 365 },
+                cacheableResponse: { statuses: [0, 200] },
+              },
             },
           ],
         },
