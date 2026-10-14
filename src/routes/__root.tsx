@@ -15,6 +15,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppDataProvider } from "@/data/AppData";
 import { IosInstallHint, PwaSetup, StreakBreakWhy, TabBar } from "@/components/AppChrome";
+import { PinGate } from "@/components/PinLock";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
@@ -110,6 +111,7 @@ function RootComponent() {
       {/* All data is local (IndexedDB), so the app renders on the client only. */}
       <ClientOnly fallback={<div className="h-dvh-screen bg-background" />}>
         <AppDataProvider>
+          <PinGate>
           <div className="h-dvh-screen mx-auto max-w-xl pb-24">
             <Outlet />
           </div>
@@ -118,6 +120,7 @@ function RootComponent() {
           <StreakBreakWhy />
           <PwaSetup />
           <Toaster position="top-center" />
+          </PinGate>
         </AppDataProvider>
       </ClientOnly>
     </QueryClientProvider>

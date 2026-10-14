@@ -57,6 +57,8 @@ export interface Settings extends BaseRecord {
   theme: Theme;
   accent: string;
   prompts: string[];
+  /** SHA-256 of the app PIN; absent = no lock. */
+  pinHash?: string;
 }
 
 export interface Challenge extends BaseRecord {
