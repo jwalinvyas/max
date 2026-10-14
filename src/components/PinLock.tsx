@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Delete, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -6,16 +6,45 @@ import { useApp } from "@/data/AppData";
 import { repo } from "@/data/repo";
 
 const LEN = 4;
-export async function hashPin(pin: string) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`max-pin:${pin}`));
-  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, "0")).join("");
+const hex = (b: ArrayBuffer | Uint8Array) =>
+  Array.from(b instanceof Uint8Array ? b : new Uint8Array(b), (x) => x.toString(16).padStart(2, "0")).join("");
+const ITER = 210_000;
+
+async function pbkdf2(pin: string, salt: Uint8Array, iter: number) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"]);
+  return hex(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: salt as BufferSource, iterations: iter }, key, 256));
 }
 
-function Keypad({ title, onComplete }: { title: string; onComplete: (pin: string) => Promise<boolean> }) {
+/** Salted, slow hash: "pbkdf2$iter$salt$hash". */
+export async function hashPin(pin: string) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  return `pbkdf2$${ITER}$${hex(salt)}$${await pbkdf2(pin, salt, ITER)}`;
+}
+
+export async function verifyPin(pin: string, stored: string) {
+  const parts = stored.split("$");
+  if (parts[0] === "pbkdf2" && parts.length === 4) {
+    const salt = new Uint8Array(parts[2].match(/../g)!.map((h) => parseInt(h, 16)));
+    return (await pbkdf2(pin, salt, Number(parts[1]))) === parts[3];
+  }
+  // Legacy unsalted SHA-256 hashes from the first version.
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`max-pin:${pin}`));
+  return hex(buf) === stored;
+}
+
+// Lockout after repeated wrong PINs, persisted so a reload doesn't reset it.
+const FAIL_KEY = "max-pin-fails";
+const readFails = (): { n: number; until: number } => {
+  try { return JSON.parse(localStorage.getItem(FAIL_KEY) || "") ?? { n: 0, until: 0 }; } catch { return { n: 0, until: 0 }; }
+};
+const writeFails = (v: { n: number; until: number }) => localStorage.setItem(FAIL_KEY, JSON.stringify(v));
+const RELOCK_MS = 60_000;
+
+function Keypad({ title, onComplete, lockedFor = 0 }: { title: string; onComplete: (pin: string) => Promise<boolean>; lockedFor?: number }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState(false);
   const press = async (d: string) => {
-    if (pin.length >= LEN) return;
+    if (pin.length >= LEN || lockedFor > 0) return;
     const next = pin + d;
     setError(false);
     setPin(next);
@@ -34,7 +63,7 @@ function Keypad({ title, onComplete }: { title: string; onComplete: (pin: string
           <span key={i} className={`size-3 rounded-full border ${i < pin.length ? "bg-foreground" : ""} ${error ? "border-destructive" : "border-muted-foreground"}`} />
         ))}
       </div>
-      <p className="h-4 text-xs text-muted-foreground">{error ? "Wrong PIN. Try again." : ""}</p>
+      <p className="h-4 text-xs text-muted-foreground">{lockedFor > 0 ? `Too many attempts. Wait ${lockedFor}s.` : error ? "Wrong PIN. Try again." : ""}</p>
       <div className="grid grid-cols-3 gap-3">
         {["1","2","3","4","5","6","7","8","9"].map((d) => (
           <Button key={d} variant="outline" className="size-16 rounded-full text-xl" onClick={() => press(d)}>{d}</Button>
@@ -47,20 +76,52 @@ function Keypad({ title, onComplete }: { title: string; onComplete: (pin: string
   );
 }
 
-/** Blocks the app until the PIN is entered, once per app open. */
+/** Blocks the app until the PIN is entered; re-locks after a minute in the background. */
 export function PinGate({ children }: { children: ReactNode }) {
   const { settings, ready } = useApp();
   const [unlocked, setUnlocked] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
+  const [until, setUntil] = useState(0);
+
+  useEffect(() => setUntil(readFails().until), []);
+  useEffect(() => {
+    if (until <= Date.now()) return;
+    const t = setInterval(() => setNow(Date.now()), 500);
+    return () => clearInterval(t);
+  }, [until]);
+  useEffect(() => {
+    let hiddenAt = 0;
+    const onVis = () => {
+      if (document.hidden) hiddenAt = Date.now();
+      else if (hiddenAt && Date.now() - hiddenAt > RELOCK_MS) setUnlocked(false);
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
+  }, []);
+
   if (!ready) return <div className="h-dvh-screen bg-background" />;
   if (!settings.pinHash || unlocked) return <>{children}</>;
+  const lockedFor = Math.max(0, Math.ceil((until - now) / 1000));
   return (
     <main className="h-dvh-screen pt-safe flex items-center justify-center bg-background">
       <Keypad
         title="Enter PIN"
+        lockedFor={lockedFor}
         onComplete={async (p) => {
-          const ok = (await hashPin(p)) === settings.pinHash;
-          if (ok) setUnlocked(true);
-          return ok;
+          if (await verifyPin(p, settings.pinHash!)) {
+            writeFails({ n: 0, until: 0 });
+            setUnlocked(true);
+            return true;
+          }
+          const f = readFails();
+          const n = f.n + 1;
+          // 5 free tries, then 30s, 60s, 120s... capped at 15 min.
+          const wait = n >= 5 ? Math.min(30_000 * 2 ** (n - 5), 900_000) : 0;
+          const u = wait ? Date.now() + wait : 0;
+          writeFails({ n, until: u });
+          setUntil(u);
+          setNow(Date.now());
+          return false;
         }}
       />
     </main>
@@ -86,7 +147,7 @@ export function PinSettings() {
                 await repo.updateSettings({ pinHash: await hashPin(p) });
                 setMode(null); toast("PIN lock on."); return true;
               }
-              if ((await hashPin(p)) !== settings.pinHash) return false;
+              if (!(await verifyPin(p, settings.pinHash ?? ""))) return false;
               await repo.updateSettings({ pinHash: "" });
               setMode(null); toast("PIN lock off."); return true;
             }}
