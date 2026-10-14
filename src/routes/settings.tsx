@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useApp } from "@/data/AppData";
 import { repo } from "@/data/repo";
+import { PinSettings } from "@/components/PinLock";
 import { ACCENTS, type Theme } from "@/data/types";
 
 export const Route = createFileRoute("/settings")({
@@ -92,6 +93,7 @@ function SettingsPage() {
           </ul>
         </div>
       )}
+      <PinSettings />
       <div className="space-y-2">
         <span className="eyebrow">Data</span>
         <div className="flex gap-2">
